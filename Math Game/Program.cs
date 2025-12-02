@@ -1,5 +1,14 @@
-﻿string? input = "";
+﻿using System;
+using System.Numerics;
+
 const string EXIT_COMMAND = "EXIT";
+
+int points = 0;
+string? input = "";
+List<int[]> history = new List<int[]>();
+Random randomizer = new Random();
+
+
 
 do
 {
@@ -17,7 +26,7 @@ do
         case "1":
             Console.Clear();
             Console.WriteLine("Addition challenges");
-            input = Console.ReadLine();
+            AdditionChallenges();
             break;
         case "2":
             Console.Clear();
@@ -41,3 +50,47 @@ do
     }
 
 } while (!string.Equals(input, EXIT_COMMAND, StringComparison.OrdinalIgnoreCase));
+
+
+void AdditionChallenges()
+{
+    string? guessInput = "";
+    int guess;
+    bool fail = false;
+    int firstNumber = 0;
+    int secondNumber = 0;
+
+    do
+    {
+        firstNumber = randomizer.Next(1,100);
+        secondNumber = randomizer.Next(1,100);
+
+        Console.Write($"{firstNumber} + {secondNumber} = ");
+        guessInput = Console.ReadLine();
+        
+        if (int.TryParse(guessInput, out guess))
+        {
+            bool isCorrect = guess == firstNumber + secondNumber;
+            if (guess == firstNumber + secondNumber)
+            {
+                Console.WriteLine("CORRECT! +1 point");
+                points++;
+            } else
+            {
+                Console.WriteLine("INCORRECT! You lose");
+                fail = true;
+            }
+
+            history.Add([(int)Operations.Addition, firstNumber, secondNumber, guess, Convert.ToInt32(isCorrect)]);
+        }
+
+    } while (!fail);
+}
+
+public enum Operations
+{
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division
+}
