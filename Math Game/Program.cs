@@ -15,11 +15,26 @@ do
 {
     Console.Clear();
     Console.WriteLine("Welcome to the Math Game!");
+    Console.WriteLine($"Current Points: {points}\n");
     Console.WriteLine("Choose an option:");
     Console.WriteLine("1. Addition challenge");
     Console.WriteLine("2. Subtraction challenge");
     Console.WriteLine("3. Multiplication challenge");
     Console.WriteLine("4. Division challenge");
+    Console.WriteLine("'exit' to close the program\n");
+    Console.WriteLine("History:");
+
+    foreach ( int[]match in history){
+        Console.WriteLine(match[0] switch
+        {
+            0 => $"{match[1]} + {match[2]} = {match[3]} : {(match[4] == 1 ? "Correct" : "Incorrect")}",
+            1 => $"{match[1]} - {match[2]} = {match[3]} : {(match[4] == 1 ? "Correct" : "Incorrect")}",
+            2 => $"{match[1]} * {match[2]} = {match[3]} : {(match[4] == 1 ? "Correct" : "Incorrect")}",
+            3 => $"{match[1]} / {match[2]} = {match[3]} : {(match[4] == 1 ? "Correct" : "Incorrect")}",
+            _ => "Unknown operation"
+        });
+    }
+
     input = Console.ReadLine();
     input = input?.Trim();
     
@@ -44,32 +59,61 @@ void Challenges(int choice)
     int secondNumber = 0;
     int result = 0;
 
+    void AddHistory(Operations op, int a, int b, int g, bool correct)
+    {
+        history.Add([(int)op, a, b, g, Convert.ToInt32(correct)]);
+    }
+
+    Operations resolvedOperation = choice switch
+    {
+        1 => Operations.Addition,
+        2 => Operations.Subtraction,
+        3 => Operations.Multiplication,
+        4 => Operations.Division,
+        _ => throw new ArgumentOutOfRangeException(nameof(choice))
+    };
+
     do
     {
-        firstNumber = randomizer.Next(1,100);
-        secondNumber = randomizer.Next(1,100);
+        Console.WriteLine("<ENTER> to go back");
 
         switch (choice)
         {
             case 1:
-                Console.Write($"{firstNumber} + {secondNumber} = ");
+                firstNumber = randomizer.Next(1, 100);
+                secondNumber = randomizer.Next(1, 100);
                 result = firstNumber + secondNumber;
+                Console.Write($"{firstNumber} + {secondNumber} = ");
                 break;
             case 2:
-                Console.Write($"{firstNumber} - {secondNumber} = ");
+                firstNumber = randomizer.Next(1, 100);
+                secondNumber = randomizer.Next(1, 100);
                 result = firstNumber - secondNumber;
+                Console.Write($"{firstNumber} - {secondNumber} = ");
                 break;
             case 3:
-                Console.Write($"{firstNumber} * {secondNumber} = ");
+                firstNumber = randomizer.Next(0, 50);
+                secondNumber = randomizer.Next(0, 10);
                 result = firstNumber * secondNumber;
+                Console.Write($"{firstNumber} * {secondNumber} = ");
                 break;
             case 4:
+                secondNumber = randomizer.Next(1, 13);
+                int quotient = randomizer.Next(1, 13);
+                firstNumber = secondNumber * quotient;
+                result = quotient;
                 Console.Write($"{firstNumber} / {secondNumber} = ");
-                result = firstNumber / secondNumber;
                 break;
         }
         guessInput = Console.ReadLine();
-        
+
+        if (string.IsNullOrWhiteSpace(guessInput) || string.Equals(guessInput, EXIT_COMMAND, StringComparison.OrdinalIgnoreCase))
+        {
+            fail = true;
+            Console.Clear();
+            break;
+        }
+
         if (int.TryParse(guessInput, out guess))
         {
             bool isCorrect = guess == result;
@@ -77,27 +121,17 @@ void Challenges(int choice)
             {
                 Console.WriteLine("CORRECT! +1 point");
                 points++;
-            } else
+                Console.ReadLine();
+                Console.Clear();
+            }
+            else
             {
                 Console.WriteLine("INCORRECT! You lose");
                 fail = true;
+                Console.ReadLine();
+                Console.Clear();
             }
-
-            switch (choice)
-            {
-                case 1:
-                    history.Add([(int)Operations.Addition, firstNumber, secondNumber, guess, Convert.ToInt32(isCorrect)]);
-                    break;
-                case 2:
-                    history.Add([(int)Operations.Subtraction, firstNumber, secondNumber, guess, Convert.ToInt32(isCorrect)]);
-                    break;
-                case 3:
-                    history.Add([(int)Operations.Multiplication, firstNumber, secondNumber, guess, Convert.ToInt32(isCorrect)]);
-                    break;
-                case 4:
-                    history.Add([(int)Operations.Division, firstNumber, secondNumber, guess, Convert.ToInt32(isCorrect)]);
-                    break;
-            }
+            AddHistory(resolvedOperation, firstNumber, secondNumber, guess, isCorrect);
         }
 
     } while (!fail);
